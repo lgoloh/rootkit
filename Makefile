@@ -7,7 +7,9 @@ PWD := $(shell pwd)
 
 .PHONY: build clean  
 
-all:
+all: sneaky build
+
+sneaky:
 	$(CC) $(CFLAGS) sneaky_process.c -o sneaky_process
 
 build:
