@@ -1,4 +1,4 @@
-# rootkit
+# Rootkit
 
 A rootkit: a kernel module designed to intercept system calls to hide the subversive behaviors of another program.
 
